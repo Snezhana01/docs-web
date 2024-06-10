@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { Container, Box, Typography, Grid, Paper, Button, CircularProgress, TextField } from '@mui/material';
+import { Container, Box, Grid, Paper, Button, CircularProgress, TextField, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useSnackbar } from 'notistack';
 import debounce from 'lodash.debounce';
 import ChaptersList from '../ChaptersList/ChaptersList';
@@ -57,17 +58,50 @@ const BookProfile: React.FC = () => {
         }
     };
 
-    const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setBook((prevBook: any) => ({
-                    ...prevBook,
-                    cover: { ...prevBook.cover, url: reader.result as string },
-                }));
-            };
-            reader.readAsDataURL(file);
+            const formData = new FormData();
+            formData.append('COVER', file);
+
+            try {
+                const accessToken = localStorage.getItem('accessToken');
+                const uploadResponse = await fetch('http://localhost:5000/v1/upload/files', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                    },
+                    body: formData,
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error('Failed to upload cover');
+                }
+
+                const uploadData = await uploadResponse.json();
+                const coverId = uploadData[0].id;
+
+                const patchResponse = await fetch(`http://localhost:5000/v1/books/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`,
+                    },
+                    body: JSON.stringify({ coverId }),
+                });
+
+                if (!patchResponse.ok) {
+                    throw new Error('Failed to update cover');
+                }
+
+                // Fetch the updated book data
+                fetchBook();
+                enqueueSnackbar('Обложка успешно обновлена', { variant: 'success' });
+
+            } catch (error) {
+                console.error('Error uploading cover:', error);
+                enqueueSnackbar('Ошибка при загрузке обложки', { variant: 'error' });
+            }
         }
     };
 
@@ -91,6 +125,7 @@ const BookProfile: React.FC = () => {
             enqueueSnackbar('Ошибка при удалении главы', { variant: 'error' });
         }
     };
+
     const handleAddChapter = async (chapterName: string) => {
         try {
             const accessToken = localStorage.getItem('accessToken');
@@ -164,7 +199,21 @@ const BookProfile: React.FC = () => {
                     <Grid item xs={12} md={4}>
                         <Paper elevation={3} style={{ height: 450, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
                             {book.cover ? (
-                                <img src={book.cover.url} alt="Обложка книги" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <>
+                                    <img src={book.cover.url} alt="Обложка книги" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <input
+                                        accept="image/*"
+                                        style={{ display: 'none' }}
+                                        id="upload-cover"
+                                        type="file"
+                                        onChange={handleCoverChange}
+                                    />
+                                    <label htmlFor="upload-cover">
+                                        <IconButton component="span" style={{ position: 'absolute', top: 10, right: 10, color: '#fff' }}>
+                                            <CloudUploadIcon />
+                                        </IconButton>
+                                    </label>
+                                </>
                             ) : (
                                 <Box style={{ width: '100%', height: '100%', backgroundColor: '#e0e0e0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                     <input
