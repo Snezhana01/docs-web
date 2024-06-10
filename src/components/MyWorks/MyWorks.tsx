@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Box, Button, Grid, Typography, Paper } from '@mui/material';
+import { Container, Box, Button, Grid, Typography, Paper, CircularProgress } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import BookCard from '../BookCard/BookCard';
 import Popup from '../Popup/Popup';
@@ -7,6 +7,8 @@ import Popup from '../Popup/Popup';
 const MyWorks: React.FC = () => {
   const [books, setBooks] = useState<any[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchBooks();
@@ -24,7 +26,10 @@ const MyWorks: React.FC = () => {
         throw new Error('Failed to fetch books');
       }
       const data = await response.json();
+
       setBooks(data.data);
+      setIsLoading(false)
+
     } catch (error) {
       console.error('Error fetching books:', error);
     }
@@ -41,6 +46,9 @@ const MyWorks: React.FC = () => {
   const handleBookCreated = () => {
     fetchBooks(); // Обновляем список книг после успешного создания
   };
+
+
+  if (isLoading) return <><CircularProgress size={24} color="inherit" /></>;
 
   return (
     <Container maxWidth="lg">

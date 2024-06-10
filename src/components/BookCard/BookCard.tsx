@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardContent, Typography, Button, Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 interface Book {
     id: string;
@@ -14,8 +15,13 @@ interface BookCardProps {
 }
 
 const BookCard: React.FC<BookCardProps> = ({ book }) => {
-    return (
+    const navigate = useNavigate();
 
+    const handleEditClick = () => {
+        navigate(`/books/${book.id}`);
+    };
+
+    return (
         <>
             <Typography variant="h6" gutterBottom>
                 {book.name}
@@ -30,7 +36,7 @@ const BookCard: React.FC<BookCardProps> = ({ book }) => {
                 Примечания: {book.authorPreferences.length > 10 ? `${book.authorPreferences.slice(0, 10)}...` : book.authorPreferences}
             </Typography>
             <Box mt={2}>
-                <Button variant="contained" color="primary" fullWidth>
+                <Button variant="contained" color="primary" fullWidth onClick={handleEditClick}>
                     Редактировать
                 </Button>
             </Box>

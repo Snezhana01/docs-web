@@ -8,6 +8,9 @@ import MyWorks from '../MyWorks/MyWorks'; // Импортируем компон
 import './App.css';
 import Footer from '../Footer/Footer';
 import { AuthProvider, useAuth } from '../../contexts/AuthContext';
+import BookProfile from '../BookProfile/BookProfile';
+import { SnackbarProvider } from 'notistack';
+import ChapterEdit from '../ChapterEdit/ChapterEdit';
 
 const App: React.FC = () => {
   return (
@@ -31,24 +34,29 @@ const AppContent: React.FC = () => {
   }, [login]); // Вызываем useEffect только при изменении функции login
 
   return (
-    <div className="container">
-      <div className="wrapper">
-        <Header />
-        <div className="content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            {isAuthenticated ? (
-              <Route path="/my-works" element={<MyWorks />} /> // Отображаем MyWorks, если пользователь аутентифицирован
-            ) : (
-              <Route path="/my-works" element={<Navigate to="/login" />} /> // Перенаправляем на страницу входа, если пользователь не аутентифицирован
-            )}
-          </Routes>
+    <SnackbarProvider maxSnack={3}>
+      <div className="container">
+        <div className="wrapper">
+          <Header />
+          <div className="content">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/books/:id" element={<BookProfile />} />
+              <Route path="/chapters/:id/edit" element={<ChapterEdit />} />
+              {isAuthenticated ? (
+                <Route path="/my-works" element={<MyWorks />} /> // Отображаем MyWorks, если пользователь аутентифицирован
+              ) : (
+                <Route path="/my-works" element={<Navigate to="/login" />} /> // Перенаправляем на страницу входа, если пользователь не аутентифицирован
+              )}
+            </Routes>
+          </div>
+          <Footer />
         </div>
-        <Footer />
       </div>
-    </div>
+    </SnackbarProvider>
+
   );
 };
 
