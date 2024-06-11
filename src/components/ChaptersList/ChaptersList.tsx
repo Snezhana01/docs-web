@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Grid, Box, TextField, IconButton, Paper } from '@mui/material';
+import { Grid, Box, TextField, IconButton, Paper, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SaveIcon from '@mui/icons-material/Save';
 import ChapterCard from '../ChapterCard/ChapterCard';
@@ -29,6 +29,7 @@ const ChaptersList: React.FC<ChaptersListProps> = ({ chapters, onDelete, onAddCh
 
     return (
         <Box>
+            <Typography variant="h6">Главы</Typography>
             <Box mb={2}>
                 {isAdding ? (
                     <Box display="flex" alignItems="center">
@@ -50,7 +51,7 @@ const ChaptersList: React.FC<ChaptersListProps> = ({ chapters, onDelete, onAddCh
                     </Box>
                 )}
             </Box>
-            <Paper style={{ maxHeight: 400, overflow: 'auto' }}>
+            <Paper style={{ maxHeight: 300, overflow: 'auto' }}>
                 <Grid container spacing={3}>
                     {chapters.map((chapter, index) => (
                         <Grid key={chapter.id} item xs={12}>
